@@ -96,7 +96,8 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                           selectedPost = user.posts[index];
                                         });
                                       },
-                                      child: user.posts[index].image,
+                                      child:
+                                          Container(), //user.posts[index].image,
                                     )),
                               ),
                               GridView.builder(
@@ -113,7 +114,8 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                           selectedPost = user.likedPosts[index];
                                         });
                                       },
-                                      child: user.likedPosts[index].image,
+                                      child:
+                                          Container(), //user.likedPosts[index].image,
                                     )),
                               ),
                             ],
@@ -131,7 +133,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                         title: const Text('Posty'),
                       ),
                       body: ListItem(
-                        post: selectedPost,
+                        post: selectedPost as Post,
                       ),
                     ),
                   ),

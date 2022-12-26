@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:kitticure/auth-cubit.dart';
 import 'package:kitticure/searchPage.dart';
 import 'package:kitticure/listOfPictures.dart';
 import 'package:kitticure/addPost.dart';
 import 'package:kitticure/profile.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+  const MainPage({super.key, required this.state});
 
+  final AuthState state; 
   @override
   State<MainPage> createState() => _MainPageState();
 }

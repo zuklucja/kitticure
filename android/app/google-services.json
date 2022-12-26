@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "31081041098",
+    "firebase_url": "https://kitticure-app-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "kitticure-app",
+    "storage_bucket": "kitticure-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:31081041098:android:e255ab323cdef277957833",
+        "android_client_info": {
+          "package_name": "com.example.kitticure"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "31081041098-hbcb0mgkv0c2fg27aa9qnqajb3ueett8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIINuRPATuRd3JS4NvWvDhePAgxKX81as"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "31081041098-hbcb0mgkv0c2fg27aa9qnqajb3ueett8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "31081041098-bfeol200bc6pihrid9vfgq15cco0n1t4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.kitticure"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

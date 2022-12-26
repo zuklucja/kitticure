@@ -1,17 +1,15 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:kitticure/mainPage.dart';
 import 'package:kitticure/posts.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class LoginPage extends StatefulWidget {
+import 'auth-cubit.dart';
+
+class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
-
-  @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  bool logIn = false, reg = false, ok = false;
 
   @override
   Widget build(BuildContext context) {
@@ -20,62 +18,12 @@ class _LoginPageState extends State<LoginPage> {
       theme: ThemeData(
         primarySwatch: Colors.brown,
       ),
-      home: Navigator(
-        pages: [
-          MaterialPage(
-            key: const ValueKey("HomeScreen"),
-            child: LogOrRegister(
-              onPressedLog: () {
-                setState(() {
-                  logIn = true;
-                });
-              },
-              onPressedReg: () {
-                setState(() {
-                  reg = true;
-                });
-              },
-            ),
-          ),
-          if (logIn)
-            MaterialPage(
-              key: const ValueKey("Login Page"),
-              child: LogInWindow(
-                onPressedOK: () {
-                  setState(() {
-                    ok = true;
-                  });
-                },
-              ),
-            ),
-          if (reg)
-            MaterialPage(
-              key: const ValueKey("Register Page"),
-              child: RegisterWindow(
-                onPressedOK: () {
-                  setState(() {
-                    ok = true;
-                  });
-                },
-              ),
-            ),
-          if (ok)
-            const MaterialPage(
-              key: ValueKey("Main Page"),
-              child: MainPage(),
-            )
-        ],
-        onPopPage: (route, result) {
-          if (!route.didPop(result)) {
-            return false;
-          }
-
-          setState(() {
-            logIn = false;
-            reg = false;
-          });
-
-          return true;
+      home: LogOrRegister(
+        onPressedLog: () {
+          context.read<AuthCubit>().tryToSignIn();
+        },
+        onPressedReg: () {
+          context.read<AuthCubit>().tryToSignUp();
         },
       ),
     );
@@ -110,30 +58,38 @@ class LogOrRegister extends StatelessWidget {
 }
 
 class LogInWindow extends StatefulWidget {
-  const LogInWindow({super.key, required this.onPressedOK});
-  final VoidCallback onPressedOK;
+  const LogInWindow({super.key, required this.state});
+  final AuthState state;
 
   @override
   State<LogInWindow> createState() => _LogInWindowState();
 }
 
 class _LogInWindowState extends State<LogInWindow> {
-  TextEditingController loginController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Kitticure")),
+      appBar: AppBar(
+        title: const Text("Zaloguj się"),
+        leading: IconButton(
+          onPressed: () {
+            context.read<AuthCubit>().goBack();
+          },
+          icon: const Icon(Icons.arrow_back),
+        ),
+      ),
       body: Center(
         child: Column(
           children: [
             TextField(
               autofocus: true,
-              controller: loginController,
+              controller: emailController,
               obscureText: false,
               decoration: const InputDecoration(
-                  border: OutlineInputBorder(), labelText: 'Login'),
+                  border: OutlineInputBorder(), labelText: 'Adres email'),
             ),
             TextField(
               controller: passwordController,
@@ -142,14 +98,19 @@ class _LogInWindowState extends State<LogInWindow> {
                   border: OutlineInputBorder(), labelText: 'Hasło'),
             ),
             MaterialButton(
-                onPressed: () {
-                  final user = Provider.of<Admin>(context, listen: false)
-                      .findUser(loginController.text, passwordController.text);
-                  Provider.of<Admin>(context, listen: false)
-                      .setCurrentUser(user);
-                  widget.onPressedOK();
+                onPressed: () async {
+                  context.read<AuthCubit>().signIn(
+                      email: emailController.text,
+                      password: passwordController.text);
+
+                  // final user = Provider.of<Admin>(context, listen: false)
+                  //     .findUser(emailController.text);
+                  // Provider.of<Admin>(context, listen: false)
+                  //     .setCurrentUser(user);
                 },
-                child: const Text('OK'))
+                child: const Text('OK')),
+            const SizedBox(height: 16),
+            Text(widget.state.error ?? ''),
           ],
         ),
       ),
@@ -158,26 +119,41 @@ class _LogInWindowState extends State<LogInWindow> {
 }
 
 class RegisterWindow extends StatefulWidget {
-  const RegisterWindow({super.key, required this.onPressedOK});
-  final VoidCallback onPressedOK;
+  const RegisterWindow({super.key, required this.state});
+  final AuthState state;
 
   @override
   State<RegisterWindow> createState() => _RegisterWindowState();
 }
 
 class _RegisterWindowState extends State<RegisterWindow> {
+  TextEditingController emailController = TextEditingController();
   TextEditingController loginController = TextEditingController();
-
   TextEditingController passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     final addUser = Provider.of<Admin>(context, listen: false).addUser;
     return Scaffold(
-      appBar: AppBar(title: const Text("Kitticure")),
+      appBar: AppBar(
+        title: const Text("Zarejestruj się"),
+        leading: IconButton(
+          onPressed: () {
+            context.read<AuthCubit>().goBack();
+          },
+          icon: const Icon(Icons.arrow_back),
+        ),
+      ),
       body: Center(
         child: Column(
           children: [
+            TextField(
+              autofocus: true,
+              controller: emailController,
+              obscureText: false,
+              decoration: const InputDecoration(
+                  border: OutlineInputBorder(), labelText: 'Adres email'),
+            ),
             TextField(
               autofocus: true,
               controller: loginController,
@@ -192,16 +168,18 @@ class _RegisterWindowState extends State<RegisterWindow> {
                   border: OutlineInputBorder(), labelText: 'Hasło'),
             ),
             MaterialButton(
-                onPressed: () {
-                  User user = User(
-                      login: loginController.text,
-                      password: passwordController.text);
-                  Provider.of<Admin>(context, listen: false).addUser(user);
-                  Provider.of<Admin>(context, listen: false)
-                      .setCurrentUser(user);
-                  widget.onPressedOK();
-                },
-                child: const Text('OK'))
+              onPressed: () async {
+                context.read<AuthCubit>().signUp(
+                    email: emailController.text,
+                    login: loginController.text,
+                    password: passwordController.text);
+
+                // Provider.of<Admin>(context, listen: false).setCurrentUser(user);
+              },
+              child: const Text('OK'),
+            ),
+            const SizedBox(height: 16),
+            Text(widget.state.error ?? ''),
           ],
         ),
       ),

@@ -1,9 +1,12 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:kitticure/posts.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:kitticure/storage-service.dart';
 
 class AddPost extends StatefulWidget {
   const AddPost({super.key});
@@ -13,23 +16,22 @@ class AddPost extends StatefulWidget {
 
 class _AddPostState extends State<AddPost> {
   /// Variables
-  File? imageFile;
+  Image? image;
+  User? user = FirebaseAuth.instance.currentUser;
+  final Storage storage = Storage();
+  final storageRef = FirebaseStorage.instance.ref();
 
   /// Widget
   @override
   Widget build(BuildContext context) {
-    final user = Provider.of<Admin>(context, listen: false).getCurrentUser;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Image Picker"),
       ),
       body: Container(
-          child: imageFile != null
+          child: image != null
               ? Container(
-                  child: Image.file(
-                    imageFile!,
-                    fit: BoxFit.cover,
-                  ),
+                  child: image,
                 )
               : Container(
                   alignment: Alignment.center,
@@ -45,7 +47,9 @@ class _AddPostState extends State<AddPost> {
                       Container(
                         height: 40.0,
                       ),
-                      if (Platform.isAndroid || Platform.isIOS)
+                      if (kIsWeb)
+                        Container()
+                      else if (Platform.isAndroid || Platform.isIOS)
                         ElevatedButton(
                           onPressed: () {
                             _getFromCamera(user);
@@ -60,18 +64,24 @@ class _AddPostState extends State<AddPost> {
 
   /// Get from gallery
   _getFromGallery(User? user) async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
+    var result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['jpg', 'png'],
     );
 
     if (result != null) {
-      setState(() {
-        File file = File(result.files.single.path!);
+      setState(() async {
         if (user != null) {
-          user.addPost(Image.file(file));
+          var resultFF =
+              await FirebaseFirestore.instance.collection('posts').add({
+            'ownerLogin': getCurrentUserLogin(user.uid),
+            'date': DateTime.now(),
+          });
+
+          await storage.uploadFile(result.files.first.name, resultFF.id);
+          final url = await storage.downloadUrl(resultFF.id);
+          image = Image.network(url);
         }
-        imageFile = file;
       });
     }
   }
@@ -84,12 +94,36 @@ class _AddPostState extends State<AddPost> {
       maxHeight: 1800,
     );
     if (pickedFile != null) {
-      setState(() {
+      setState(() async {
         if (user != null) {
-          user.addPost(Image.file(File(pickedFile.path)));
+          var resultFF =
+              await FirebaseFirestore.instance.collection('posts').add({
+            'ownerLogin': getCurrentUserLogin(user.uid),
+            'date': DateTime.now(),
+          });
+
+          await storage.uploadFile(pickedFile.path, resultFF.id);
+          final url = await storage.downloadUrl(resultFF.id);
+          image = Image.network(url);
         }
-        imageFile = File(pickedFile.path);
       });
     }
+  }
+
+  String getCurrentUserLogin(String? uid) {
+    if (uid == null) return "";
+
+    String result = "";
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get()
+        .then((DocumentSnapshot documentSnapshot) {
+      if (documentSnapshot.exists && documentSnapshot.data() != null) {
+        final data = documentSnapshot.data() as Map<String, dynamic>;
+        result = data['login'];
+      }
+    });
+    return result;
   }
 }

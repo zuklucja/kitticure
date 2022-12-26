@@ -1,29 +1,43 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 
 class Post {
-  final Image image;
-  final User user;
-  final DateTime date;
+  final String ownerLogin;
+  final Timestamp date;
+  final String postId;
 
-  Post({required this.user, required this.image, required this.date});
+  Post({required this.ownerLogin, required this.date, required this.postId});
+
+  Post.fromJson(Map<String, Object?> json, String postId)
+      : this(
+            ownerLogin: json['ownerLogin'] as String,
+            date: json['date'] as Timestamp,
+            postId: postId);
+
+  Map<String, Object?> toJson() {
+    return {
+      'ownerLogin': ownerLogin,
+      'date': date,
+    };
+  }
 }
 
-class User {
+class MyUser {
+  final String emailAddress;
   final String login;
-  final String password;
   List<Post> posts = [];
   List<Post> likedPosts = [];
 
-  User({required this.login, required this.password});
+  MyUser({required this.emailAddress, required this.login});
   void addPost(Image image) {
-    posts.add(Post(user: this, image: image, date: DateTime.now()));
+    posts.add(Post(ownerLogin: login, date: Timestamp.now(), postId: ""));
     posts.sort((a, b) => b.date.compareTo(a.date));
   }
 
   List<Post> get getPosts => posts;
   List<Post> get getLikedPosts => likedPosts;
-  User get getCurrentUser => this;
+  MyUser get getCurrentUser => this;
   void addLikedPost(Post post) {
     likedPosts.add(post);
     likedPosts.sort((a, b) => b.date.compareTo(a.date));
@@ -31,25 +45,25 @@ class User {
 }
 
 class Admin extends ChangeNotifier {
-  final List<User> users = [];
-  late User admin;
-  User? currentUser;
+  final List<MyUser> users = [];
+  late MyUser admin;
+  MyUser? currentUser;
 
-  void addUser(User user) {
+  void addUser(MyUser user) {
     users.add(user);
     notifyListeners();
   }
 
-  List<User> get getUsers => users;
-  User? get getCurrentUser => currentUser;
-  void setCurrentUser(User? user) {
+  List<MyUser> get getUsers => users;
+  MyUser? get getCurrentUser => currentUser;
+  void setCurrentUser(MyUser? user) {
     currentUser = user;
     notifyListeners();
   }
 
-  User? findUser(String login, String password) {
+  MyUser? findUser(String emailAddress) {
     for (int i = 0; i < users.length; i++) {
-      if (users[i].login == login && users[i].password == password) {
+      if (users[i].emailAddress == emailAddress) {
         return users[i];
       }
     }
@@ -57,18 +71,18 @@ class Admin extends ChangeNotifier {
   }
 
   Admin() {
-    admin = User(login: 'Kitticure', password: 'pass1');
-    Generator.generatePosts(10, admin);
-    addUser(admin);
-    sleep(const Duration(seconds: 1));
-    final user = User(login: 'admin', password: 'pass');
-    Generator.generatePosts(5, user);
-    addUser(user);
+    // admin = MyUser(login: 'Kitticure', password: 'pass1');
+    // Generator.generatePosts(10, admin);
+    // addUser(admin);
+    // sleep(const Duration(seconds: 1));
+    // final user = MyUser(login: 'admin', password: 'pass');
+    // Generator.generatePosts(5, user);
+    // addUser(user);
   }
 }
 
 class AllPosts {
-  static List<Post> combineAllPosts(List<User> users) {
+  static List<Post> combineAllPosts(List<MyUser> users) {
     List<Post> allPosts = [];
     users.forEach((user) => allPosts.addAll(user.posts));
     allPosts.sort((a, b) => b.date.compareTo(a.date));
@@ -77,7 +91,7 @@ class AllPosts {
 }
 
 class Generator {
-  static void generatePosts(int number, User user) {
+  static void generatePosts(int number, MyUser user) {
     for (int i = 0; i < number; i++) {
       user.addPost(
         Image.network("https://placekitten.com/300/300?${4 * i + 200}"),
