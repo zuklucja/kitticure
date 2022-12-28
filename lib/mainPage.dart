@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:kitticure/auth-cubit.dart';
-import 'package:kitticure/searchPage.dart';
+import 'package:kitticure/auth_cubit.dart';
+import 'package:kitticure/searchpage.dart';
 import 'package:kitticure/listOfPictures.dart';
 import 'package:kitticure/addPost.dart';
 import 'package:kitticure/profile.dart';
@@ -16,10 +16,10 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
   final List<Widget> _pages = <Widget>[
-    const ListOfPictures(),
+    ListOfPictures(),
     const SearchPage(),
     const AddPost(),
-    const Profile(),
+    Profile(),
   ];
 
   @override
