@@ -1,17 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kitticure/profile.dart';
+import 'package:kitticure/search_cubit.dart';
+import 'package:kitticure/search_service.dart';
+import 'package:kitticure/user_search.dart';
+import 'package:provider/provider.dart';
+
+class SearchGate extends StatelessWidget {
+  const SearchGate({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Provider(
+        create: (_) => SearchService(),
+        child: BlocProvider(
+          create: (context) => SearchCubit(searchService: context.read()),
+          child: BlocBuilder<SearchCubit, SearchState>(
+            builder: (context, state) {
+              if (state is ListState) {
+                return const SearchPage();
+              } else if (state is SearchedProfileState) {
+                return Profile(
+                  login: state.searchedUserLogin,
+                  isFromSearch: true,
+                );
+              } else {
+                return const SizedBox();
+              }
+            },
+          ),
+        ));
+  }
+}
 
 class SearchPage extends StatelessWidget {
   const SearchPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return CustomScrollView(
+      slivers: [
+        SliverAppBar(
+          floating: true,
+          snap: true,
+          title: const Text("Wyszukaj użytkownika"),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () {
+                showSearch(
+                  context: context,
+                  delegate:
+                      UserSearch(searchCubit: context.read<SearchCubit>()),
+                );
+              },
+            ),
+          ],
+        ),
+      ],
+    );
   }
 }
-
-/*
-https://api.flutter.dev/flutter/material/showSearch.html
-https://api.flutter.dev/flutter/material/SearchDelegate-class.html
-https://levelup.gitconnected.com/implement-a-search-and-filter-in-flutter-56d046e12c05
-https://medium.com/codechai/implementing-search-in-flutter-17dc5aa72018
- */

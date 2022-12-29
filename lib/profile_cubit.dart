@@ -20,7 +20,7 @@ class ProfileCubit extends Cubit<ProfileState> {
   Future<void> showPicture(Post post) async {
     profileService.isSelectedPicture = true;
     profileService.selectedPost = post;
-    emit(PictureState(profileService.selectedPost as Post));
+    emit(PictureState(post));
   }
 }
 

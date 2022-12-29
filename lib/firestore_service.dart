@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:kitticure/myuser.dart';
 import 'package:kitticure/posts.dart';
 
 class Firestore {
@@ -64,8 +65,14 @@ class Firestore {
     await firestore.collection('posts').doc(postId).get().then((snapshot) {
       if (snapshot.exists) {
         final val = snapshot.data();
-        final observers = val?['observers'];
-        result = observers.contains(login);
+        if (val != null) {
+          if (val.containsKey('observers')) {
+            final observers = val['observers'];
+            if (observers != null) {
+              result = observers.contains(login);
+            }
+          }
+        }
       }
     });
 
@@ -104,6 +111,17 @@ class Firestore {
           fromFirestore: (snapshot, _) =>
               Post.fromJson(snapshot.data()!, snapshot.id),
           toFirestore: (post, _) => post.toJson(),
+        );
+  }
+
+  Query<MyUser> searchResult(String query) {
+    return firestore
+        .collection('users')
+        .where('login', isGreaterThanOrEqualTo: query)
+        .where('login', isLessThanOrEqualTo: '$query\uf8ff')
+        .withConverter<MyUser>(
+          fromFirestore: (snapshot, _) => MyUser.fromJson(snapshot.data()!),
+          toFirestore: (user, _) => user.toJson(),
         );
   }
 }

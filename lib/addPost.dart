@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kitticure/firestore_service.dart';
@@ -25,8 +28,11 @@ class _AddPostState extends State<AddPost> {
       ),
       body: Container(
           child: image != null
-              ? Container(
-                  child: image,
+              ? Center(
+                  child: Column(children: [
+                    const Text("Załadowano zdjęcie:"),
+                    Container(child: image),
+                  ]),
                 )
               : Container(
                   alignment: Alignment.center,
@@ -35,10 +41,17 @@ class _AddPostState extends State<AddPost> {
                     children: <Widget>[
                       ElevatedButton(
                         onPressed: () {
-                          _getFromCamera(user);
+                          _getFromGallery(user);
                         },
                         child: const Text("ZAŁADUJ ZDJĘCIE"),
-                      )
+                      ),
+                      if (!kIsWeb)
+                        ElevatedButton(
+                          onPressed: () {
+                            _getFromCamera(user);
+                          },
+                          child: const Text("ZRÓB ZDJĘCIE APARATEM"),
+                        )
                     ],
                   ),
                 )),
@@ -60,10 +73,32 @@ class _AddPostState extends State<AddPost> {
         });
 
         await storage.uploadFile(pickedFile, resultFF.id);
-        final url = await storage.downloadUrl(resultFF.id);
 
         setState(() {
-          image = Image.network(url);
+          image = Image.file(File(pickedFile.path));
+        });
+      }
+    }
+  }
+
+  _getFromGallery(User? user) async {
+    XFile? pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1800,
+      maxHeight: 1800,
+    );
+    if (pickedFile != null) {
+      if (user != null) {
+        var resultFF =
+            await FirebaseFirestore.instance.collection('posts').add({
+          'ownerLogin': await firestore.getCurrentUserLogin(user.email),
+          'date': DateTime.now(),
+        });
+
+        await storage.uploadFile(pickedFile, resultFF.id);
+
+        setState(() {
+          image = Image.file(File(pickedFile.path));
         });
       }
     }

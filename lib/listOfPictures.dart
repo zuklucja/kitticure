@@ -61,12 +61,6 @@ class ListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-// spróbuj z :
-// https://docs.flutter.dev/cookbook/lists/floating-app-bar
-// https://api.flutter.dev/flutter/material/SliverAppBar-class.html
-// https://api.flutter.dev/flutter/material/AppBar-class.html
-// https://api.flutter.dev/flutter/material/PopupMenuButton-class.html
-
     return FutureBuilder(
         future: firestore.isFavouritePost(currentUserLogin, post.postId),
         builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
@@ -97,20 +91,6 @@ class ListItem extends StatelessWidget {
         });
   }
 }
-
-//  PopupMenuButton(
-//               itemBuilder: (context) {
-//                 return [
-//                   const PopupMenuItem(
-//                     value: 'delete',
-//                     child: Text('Delete'),
-//                   )
-//                 ];
-//               },
-//               onSelected: (String value) {
-//                 print('You Click on po up menu item');
-//               },
-//             ),
 
 class Photo extends StatelessWidget {
   Photo(

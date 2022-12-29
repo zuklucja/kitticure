@@ -6,14 +6,17 @@ import 'package:kitticure/firestore_service.dart';
 import 'package:kitticure/posts.dart';
 import 'package:kitticure/profile_cubit.dart';
 import 'package:kitticure/profile_service.dart';
+import 'package:kitticure/search_cubit.dart';
 import 'package:kitticure/storage_service.dart';
 import 'package:kitticure/listOfPictures.dart';
 import 'package:provider/provider.dart';
 
 class Profile extends StatelessWidget {
-  Profile({super.key});
+  Profile({super.key, required this.login, required this.isFromSearch});
 
+  final String login;
   final User? user = FirebaseAuth.instance.currentUser;
+  final bool isFromSearch;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +28,10 @@ class Profile extends StatelessWidget {
               child: BlocBuilder<ProfileCubit, ProfileState>(
                   builder: (context, state) {
                 if (state is GridState) {
-                  return const GridWidget();
+                  return GridWidget(
+                    login: login,
+                    isFromSearch: isFromSearch,
+                  );
                 } else if (state is PictureState) {
                   return PictureItem(
                     state: state,
@@ -43,7 +49,10 @@ class Profile extends StatelessWidget {
 }
 
 class GridWidget extends StatefulWidget {
-  const GridWidget({super.key});
+  const GridWidget({super.key, required this.login, required this.isFromSearch});
+
+  final String login;
+  final bool isFromSearch;
 
   @override
   State<GridWidget> createState() => _GridWidgetState();
@@ -70,61 +79,58 @@ class _GridWidgetState extends State<GridWidget>
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: firestore.getCurrentUserLogin(user?.email),
-        builder: ((context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done &&
-              snapshot.hasData) {
-            String currentUserLogin = snapshot.data!;
-            final posts = firestore.getCurrentUserPosts(currentUserLogin);
-            final favoritePosts =
-                firestore.getCurrentUserFavoritePosts(currentUserLogin);
-            return MaterialApp(
-              theme: ThemeData(
-                primarySwatch: Colors.brown,
+    final posts = firestore.getCurrentUserPosts(widget.login);
+    final favoritePosts = firestore.getCurrentUserFavoritePosts(widget.login);
+    return MaterialApp(
+      theme: ThemeData(
+        primarySwatch: Colors.brown,
+      ),
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text("Profil użytkownika ${widget.login}"),
+          leading: widget.isFromSearch
+              ? IconButton(
+                  onPressed: () {
+                    context.read<SearchCubit>().goBack();
+                  },
+                  icon: const Icon(Icons.arrow_back),
+                )
+              : null,
+        ),
+        body: Column(
+          children: [
+            PostsAndFavoritePostsTabBar(
+              tabController: _tabController,
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  StreamBuilder(
+                      stream: posts.snapshots(),
+                      builder: ((context, snapshot) {
+                        if (snapshot.hasData) {
+                          return PicturesGrid(posts: snapshot.data?.docs);
+                        } else {
+                          return Container();
+                        }
+                      })),
+                  StreamBuilder(
+                      stream: favoritePosts.snapshots(),
+                      builder: ((context, snapshot) {
+                        if (snapshot.hasData) {
+                          return PicturesGrid(posts: snapshot.data?.docs);
+                        } else {
+                          return Container();
+                        }
+                      })),
+                ],
               ),
-              home: Scaffold(
-                body: Column(
-                  children: [
-                    CurrentUserLoginText(login: currentUserLogin),
-                    PostsAndFavoritePostsTabBar(
-                      tabController: _tabController,
-                    ),
-                    Expanded(
-                      child: TabBarView(
-                        controller: _tabController,
-                        children: [
-                          StreamBuilder(
-                              stream: posts.snapshots(),
-                              builder: ((context, snapshot) {
-                                if (snapshot.hasData) {
-                                  return PicturesGrid(
-                                      posts: snapshot.data?.docs);
-                                } else {
-                                  return Container();
-                                }
-                              })),
-                          StreamBuilder(
-                              stream: favoritePosts.snapshots(),
-                              builder: ((context, snapshot) {
-                                if (snapshot.hasData) {
-                                  return PicturesGrid(
-                                      posts: snapshot.data?.docs);
-                                } else {
-                                  return Container();
-                                }
-                              })),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            );
-          } else {
-            return Container();
-          }
-        }));
+            )
+          ],
+        ),
+      ),
+    );
   }
 }
 
