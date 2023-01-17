@@ -1,12 +1,9 @@
-import 'dart:io';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:kitticure/firestore_service.dart';
-import 'package:kitticure/storage_service.dart';
+import 'package:kitticure/services/firestore_service.dart';
+import 'package:kitticure/services/storage_service.dart';
 
 class AddPost extends StatefulWidget {
   const AddPost({super.key});
@@ -16,7 +13,7 @@ class AddPost extends StatefulWidget {
 
 class _AddPostState extends State<AddPost> {
   Image? image;
-  User? user = FirebaseAuth.instance.currentUser;
+  final User? user = FirebaseAuth.instance.currentUser;
   final Storage storage = Storage();
   final Firestore firestore = Firestore();
 
@@ -77,21 +74,7 @@ class _AddPostState extends State<AddPost> {
       maxWidth: 1800,
       maxHeight: 1800,
     );
-    if (pickedFile != null) {
-      if (user != null) {
-        var resultFF =
-            await FirebaseFirestore.instance.collection('posts').add({
-          'ownerLogin': await firestore.getCurrentUserLogin(user.email),
-          'date': DateTime.now(),
-        });
-
-        await storage.uploadFile(pickedFile, resultFF.id);
-
-        setState(() {
-          image = Image.file(File(pickedFile.path));
-        });
-      }
-    }
+    _addPickedFileToDatabase(pickedFile, user);
   }
 
   _getFromGallery(User? user) async {
@@ -100,23 +83,21 @@ class _AddPostState extends State<AddPost> {
       maxWidth: 1800,
       maxHeight: 1800,
     );
+    _addPickedFileToDatabase(pickedFile, user);
+  }
+
+  _addPickedFileToDatabase(XFile? pickedFile, User? user) async {
     if (pickedFile != null) {
-      if (user != null) {
-        var resultFF =
-            await FirebaseFirestore.instance.collection('posts').add({
-          'ownerLogin': await firestore.getCurrentUserLogin(user.email),
-          'date': DateTime.now(),
-        });
+      if (user != null && user.email != null) {
+        var id = await firestore.addNewPost(user.email!);
 
-        await storage.uploadFile(pickedFile, resultFF.id);
-        final String URL = await storage.downloadUrl(resultFF.id);
+        await storage.uploadFile(pickedFile, id);
+        final String url = await storage.downloadUrl(id);
 
-        var document =
-            FirebaseFirestore.instance.collection('posts').doc(resultFF.id);
-        document.update({'photoURL': URL});
+        firestore.updateNewPostPhotoURL(id, url);
 
         setState(() {
-          image = Image.file(File(pickedFile.path));
+          image = Image.network(url);
         });
       }
     }

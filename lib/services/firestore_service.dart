@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:kitticure/myuser.dart';
+import 'package:kitticure/my_user.dart';
 import 'package:kitticure/posts.dart';
+import 'package:flutter/foundation.dart';
 
 class Firestore {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -30,8 +31,8 @@ class Firestore {
         .collection('posts')
         .doc(postId)
         .delete()
-        .then((value) => print("Post Deleted"))
-        .catchError((error) => print("Failed to delete post: $error"));
+        .then((value) => debugPrint("Post Deleted"))
+        .catchError((error) => debugPrint("Failed to delete post: $error"));
   }
 
   Future<void> deleteFavouritePost(String login, String postId) async {
@@ -41,9 +42,9 @@ class Firestore {
         .update({
           'observers': FieldValue.arrayRemove([login])
         })
-        .then((value) => print("Post deleted from favourites"))
+        .then((value) => debugPrint("Post deleted from favourites"))
         .catchError(
-            (error) => print("Failed to delete post from favourites: $error"));
+            (error) => debugPrint("Failed to delete post from favourites: $error"));
   }
 
   Future<void> addFavouritePost(String login, String postId) async {
@@ -53,9 +54,9 @@ class Firestore {
         .update({
           'observers': FieldValue.arrayUnion([login])
         })
-        .then((value) => print("Post added to favourites"))
+        .then((value) => debugPrint("Post added to favourites"))
         .catchError(
-            (error) => print("Failed to add post to favourites: $error"));
+            (error) => debugPrint("Failed to add post to favourites: $error"));
   }
 
   Future<bool> isFavouritePost(String? login, String postId) async {
@@ -123,5 +124,18 @@ class Firestore {
           fromFirestore: (snapshot, _) => MyUser.fromJson(snapshot.data()!),
           toFirestore: (user, _) => user.toJson(),
         );
+  }
+
+  Future<String> addNewPost(String email) async {
+    var result = await firestore.collection('posts').add({
+      'ownerLogin': await getCurrentUserLogin(email),
+      'date': DateTime.now(),
+    });
+    return result.id;
+  }
+
+  Future<void> updateNewPostPhotoURL(String id, String url) async {
+    var document = firestore.collection('posts').doc(id);
+    await document.update({'photoURL': url});
   }
 }

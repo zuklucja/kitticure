@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kitticure/posts.dart';
-import 'package:kitticure/profile_service.dart';
+import 'package:kitticure/services/profile_service.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
   ProfileCubit({required this.profileService})

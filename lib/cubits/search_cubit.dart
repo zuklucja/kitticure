@@ -1,7 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kitticure/posts.dart';
-import 'package:kitticure/profile_service.dart';
-import 'package:kitticure/search_service.dart';
+import 'package:kitticure/services/search_service.dart';
 
 class SearchCubit extends Cubit<SearchState> {
   SearchCubit({required this.searchService})

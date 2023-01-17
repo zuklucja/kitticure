@@ -1,6 +1,4 @@
-import 'dart:io';
 import 'package:file/local.dart';
-import 'package:file/src/interface/file.dart';
 import 'package:flutter_cache_manager/src/storage/file_system/file_system.dart'
     as c;
 import 'package:path/path.dart' as p;
@@ -13,7 +11,6 @@ class IOFileSystem implements c.FileSystem {
   IOFileSystem(String key) : _fileDir = createDirectory(key);
 
   static Future<Directory> createDirectory(String key) async {
-    // use documents directory instead of temp
     var baseDir = await getApplicationDocumentsDirectory();
     var path = p.join(baseDir.path, key);
 
@@ -25,7 +22,6 @@ class IOFileSystem implements c.FileSystem {
 
   @override
   Future<File> createFile(String name) async {
-    assert(name != null);
     return (await _fileDir).childFile(name);
   }
 }

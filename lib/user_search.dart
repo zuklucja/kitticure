@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kitticure/firestore_service.dart';
-import 'package:kitticure/profile.dart';
-import 'package:kitticure/search_cubit.dart';
+import 'package:kitticure/services/firestore_service.dart';
+import 'package:kitticure/cubits/search_cubit.dart';
 
 class UserSearch extends SearchDelegate {
   UserSearch({required this.searchCubit});
@@ -45,7 +43,7 @@ class UserSearch extends SearchDelegate {
       stream: firestore.searchResult(query).snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          if (snapshot.data?.docs.length == 0) {
+          if (snapshot.data != null && snapshot.data!.docs.isEmpty) {
             return const Center(
               child: Text(
                 "Nie znaleziono użytkownika.",
@@ -83,7 +81,6 @@ class UserSearch extends SearchDelegate {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    // method to add search suggestions as the user enters their search term, this is the place to do that.
     return Column();
   }
 }

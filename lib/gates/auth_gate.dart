@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kitticure/auth_cubit.dart';
-import 'package:kitticure/login.dart';
+import 'package:kitticure/cubits/auth_cubit.dart';
+import 'package:kitticure/login_register.dart';
 
-import 'mainpage.dart';
+import '../main_page.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({Key? key}) : super(key: key);
@@ -17,7 +17,7 @@ class AuthGate extends StatelessWidget {
             state: state,
           );
         } else if (state is SignedOutState) {
-          return const LoginPage();
+          return const LoginOrRegisterPage();
         } else if (state is TryingToSignInState) {
           return LogInWindow(
             state: state,

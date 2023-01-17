@@ -1,6 +1,6 @@
-import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart';
 
 class Storage {
   final FirebaseStorage storage = FirebaseStorage.instance;
@@ -14,7 +14,7 @@ class Storage {
             SettableMetadata(contentType: 'image/png'),
           );
     } on FirebaseException catch (e) {
-      print(e);
+      debugPrint(e.message);
     }
   }
 

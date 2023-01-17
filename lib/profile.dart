@@ -3,53 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kitticure/firestore_service.dart';
+import 'package:kitticure/list_item.dart';
+import 'package:kitticure/services/firestore_service.dart';
 import 'package:kitticure/posts.dart';
-import 'package:kitticure/profile_cubit.dart';
-import 'package:kitticure/profile_service.dart';
-import 'package:kitticure/search_cubit.dart';
-import 'package:kitticure/storage_service.dart';
-import 'package:kitticure/listOfPictures.dart';
+import 'package:kitticure/cubits/profile_cubit.dart';
+import 'package:kitticure/cubits/search_cubit.dart';
+import 'package:kitticure/services/storage_service.dart';
 import 'package:provider/provider.dart';
-
-import 'auth_cubit.dart';
-
-class Profile extends StatelessWidget {
-  Profile({super.key, required this.login, required this.isFromSearch});
-
-  final String login;
-  final User? user = FirebaseAuth.instance.currentUser;
-  final bool isFromSearch;
-
-  @override
-  Widget build(BuildContext context) {
-    return user != null
-        ? Provider(
-            create: (_) => ProfileService(),
-            child: BlocProvider(
-              create: (context) => ProfileCubit(profileService: context.read()),
-              child: BlocBuilder<ProfileCubit, ProfileState>(
-                  builder: (context, state) {
-                if (state is GridState) {
-                  return GridWidget(
-                    login: login,
-                    isFromSearch: isFromSearch,
-                  );
-                } else if (state is PictureState) {
-                  return PictureItem(
-                    state: state,
-                  );
-                } else {
-                  return const SizedBox();
-                }
-              }),
-            ),
-          )
-        : const Center(
-            child: Text('Zaloguj się'),
-          );
-  }
-}
+import 'cubits/auth_cubit.dart';
 
 class GridWidget extends StatefulWidget {
   const GridWidget(
@@ -114,54 +75,13 @@ class _GridWidgetState extends State<GridWidget>
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  StreamBuilder(
-                      stream: posts.snapshots(),
-                      builder: ((context, snapshot) {
-                        if (snapshot.hasData) {
-                          return PicturesGrid(posts: snapshot.data?.docs);
-                        } else {
-                          return const Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.brown,
-                            ),
-                          );
-                        }
-                      })),
-                  StreamBuilder(
-                      stream: favoritePosts.snapshots(),
-                      builder: ((context, snapshot) {
-                        if (snapshot.hasData) {
-                          return PicturesGrid(posts: snapshot.data?.docs);
-                        } else {
-                          return const Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.brown,
-                            ),
-                          );
-                        }
-                      })),
+                  Grid(posts: posts),
+                  Grid(posts: favoritePosts),
                 ],
               ),
             )
           ],
         ),
-      ),
-    );
-  }
-}
-
-class CurrentUserLoginText extends StatelessWidget {
-  const CurrentUserLoginText({super.key, required this.login});
-
-  final String login;
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      login,
-      textAlign: TextAlign.start,
-      style: const TextStyle(
-        fontSize: 20,
-        fontFamily: 'Raleway',
       ),
     );
   }
@@ -174,35 +94,63 @@ class PostsAndFavoritePostsTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 45,
-      decoration: BoxDecoration(
-        color: Colors.grey[300],
-        borderRadius: BorderRadius.circular(
-          25.0,
-        ),
-      ),
-      child: TabBar(
-        controller: tabController,
-        // give the indicator a decoration (color and border radius)
-        indicator: BoxDecoration(
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        height: 45,
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
           borderRadius: BorderRadius.circular(
             25.0,
           ),
-          color: Colors.brown,
         ),
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.black,
-        tabs: const [
-          Tab(
-            text: 'Posty',
+        child: TabBar(
+          controller: tabController,
+          indicator: BoxDecoration(
+            borderRadius: BorderRadius.circular(
+              25.0,
+            ),
+            color: Colors.brown,
           ),
-          Tab(
-            text: 'Polubione posty',
-          ),
-        ],
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.black,
+          tabs: const [
+            Tab(
+              text: 'Posty',
+            ),
+            Tab(
+              text: 'Polubione posty',
+            ),
+          ],
+        ),
       ),
     );
+  }
+}
+
+class Grid extends StatelessWidget {
+  const Grid({
+    super.key,
+    required this.posts,
+  });
+
+  final Query<Post> posts;
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+        stream: posts.snapshots(),
+        builder: ((context, snapshot) {
+          if (snapshot.hasData) {
+            return PicturesGrid(posts: snapshot.data?.docs);
+          } else {
+            return const Center(
+              child: CircularProgressIndicator(
+                color: Colors.brown,
+              ),
+            );
+          }
+        }));
   }
 }
 
@@ -229,7 +177,8 @@ class PicturesGrid extends StatelessWidget {
             },
             child: Image(
                 image: CachedNetworkImageProvider(
-                    (posts?[index].data() as Post).photoURL)),
+              (posts?[index].data() as Post).photoURL,
+            )),
           )),
     );
   }

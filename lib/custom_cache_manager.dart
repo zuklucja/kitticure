@@ -1,5 +1,5 @@
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:kitticure/ioFileSystem.dart';
+import 'package:kitticure/io_file_system.dart';
 
 class CustomCacheManager extends CacheManager with ImageCacheManager {
   static const String key = "customCache";
@@ -7,9 +7,11 @@ class CustomCacheManager extends CacheManager with ImageCacheManager {
   static CustomCacheManager _instance = CustomCacheManager._();
 
   factory CustomCacheManager() {
-    return _instance ??= CustomCacheManager._();
+    return _instance = CustomCacheManager._();
   }
 
   CustomCacheManager._()
-      : super(Config(key, fileSystem: IOFileSystem(key)),);
+      : super(
+          Config(key, fileSystem: IOFileSystem(key)),
+        );
 }

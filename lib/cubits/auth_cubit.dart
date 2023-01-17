@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'auth_service.dart';
+import '../services/auth_service.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit({required this.authService})

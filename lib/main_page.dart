@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:kitticure/auth_cubit.dart';
-import 'package:kitticure/firestore_service.dart';
-import 'package:kitticure/searchpage.dart';
-import 'package:kitticure/listOfPictures.dart';
-import 'package:kitticure/addPost.dart';
-import 'package:kitticure/profile.dart';
+import 'package:kitticure/cubits/auth_cubit.dart';
+import 'package:kitticure/gates/profile_gate.dart';
+import 'package:kitticure/gates/search_gate.dart';
+import 'package:kitticure/services/firestore_service.dart';
+import 'package:kitticure/list_of_pictures.dart';
+import 'package:kitticure/add_post.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key, required this.state});
@@ -21,7 +21,7 @@ class _MainPageState extends State<MainPage> {
     ListOfPictures(),
     const SearchGate(),
     const AddPost(),
-    Profile(
+    ProfileGate(
       login: "",
       isFromSearch: false,
     ),
@@ -67,7 +67,7 @@ class _MainPageState extends State<MainPage> {
                 child: snapshot.connectionState == ConnectionState.done &&
                         snapshot.hasData
                     ? _selectedIndex == 3
-                        ? Profile(
+                        ? ProfileGate(
                             login: snapshot.data!,
                             isFromSearch: false,
                           )

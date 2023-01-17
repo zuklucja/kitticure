@@ -1,60 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:kitticure/customCacheManager.dart';
+import 'package:kitticure/custom_cache_manager.dart';
 import 'package:kitticure/posts.dart';
 import 'package:favorite_button/favorite_button.dart';
-import 'package:kitticure/storage_service.dart';
-
-import 'firestore_service.dart';
-
-class ListOfPictures extends StatelessWidget {
-  ListOfPictures({super.key});
-  final User? user = FirebaseAuth.instance.currentUser;
-  final Firestore firestore = Firestore();
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: firestore.getCurrentUserLogin(user?.email),
-      builder: ((context, snapshotFB) {
-        if (snapshotFB.connectionState == ConnectionState.done &&
-            snapshotFB.hasData) {
-          final posts = firestore.getAllUsersPosts();
-
-          return StreamBuilder(
-              stream: posts.snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return const Text('Coś poszło nie tak');
-                } else if (snapshot.connectionState ==
-                    ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(
-                      color: Colors.brown,
-                    ),
-                  );
-                } else {
-                  return ListView.builder(
-                    itemCount: snapshot.data?.docs.length,
-                    itemBuilder: ((context, index) => ListItem(
-                          post: snapshot.data?.docs[index].data() as Post,
-                          currentUserLogin: snapshotFB.data as String,
-                        )),
-                  );
-                }
-              });
-        } else {
-          return const Center(
-            child: CircularProgressIndicator(
-              color: Colors.brown,
-            ),
-          );
-        }
-      }),
-    );
-  }
-}
+import 'package:kitticure/services/firestore_service.dart';
+import 'package:kitticure/services/storage_service.dart';
 
 class ListItem extends StatelessWidget {
   const ListItem(
@@ -82,7 +33,9 @@ class ListItem extends StatelessWidget {
             width: image.width,
             height: image.height,
             decoration: BoxDecoration(
-              border: Border.all(color: const Color.fromARGB(60, 83, 83, 83)),
+              border: Border.all(
+                color: const Color.fromARGB(60, 83, 83, 83),
+              ),
               borderRadius: const BorderRadius.all(Radius.circular(10)),
             ),
             child: Column(
@@ -96,7 +49,9 @@ class ListItem extends StatelessWidget {
                 image,
                 const SizedBox(width: 5),
                 FavoriteButtonBar(
-                    post: post, currentUserLogin: currentUserLogin),
+                  post: post,
+                  currentUserLogin: currentUserLogin,
+                ),
               ],
             ),
           ),
@@ -165,12 +120,10 @@ class _FavoriteButtonBarState extends State<FavoriteButtonBar> {
 }
 
 class LoginBar extends StatelessWidget {
-  LoginBar({super.key, required this.post, required this.currentUserLogin});
+  const LoginBar(
+      {super.key, required this.post, required this.currentUserLogin});
   final Post post;
   final String currentUserLogin;
-
-  final Storage storage = Storage();
-  final Firestore firestore = Firestore();
 
   @override
   Widget build(BuildContext context) {
@@ -190,28 +143,43 @@ class LoginBar extends StatelessWidget {
           IconButton(
             onPressed: (() {
               showDialog(
-                context: context,
-                builder: (context) => Dialog(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
-                    child: InkWell(
-                      onTap: (() {
-                        removePost(post);
-                        Navigator.of(context).pop();
-                      }),
-                      child: const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child:
-                            Text('Usuń post', style: TextStyle(fontSize: 16)),
-                      ),
-                    ),
-                  ),
-                ),
-              );
+                  context: context,
+                  builder: (context) => DeletePostDialog(post: post));
             }),
             icon: const Icon(Icons.more_horiz),
           ),
       ],
+    );
+  }
+}
+
+class DeletePostDialog extends StatelessWidget {
+  DeletePostDialog({super.key, required this.post});
+
+  final Storage storage = Storage();
+  final Firestore firestore = Firestore();
+  final Post post;
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: InkWell(
+          onTap: (() {
+            removePost(post);
+            Navigator.of(context).pop();
+          }),
+          child: const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'Usuń post',
+              style: TextStyle(
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 

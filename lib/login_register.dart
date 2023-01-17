@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:kitticure/auth_cubit.dart';
+import 'package:kitticure/cubits/auth_cubit.dart';
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+class LoginOrRegisterPage extends StatelessWidget {
+  const LoginOrRegisterPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +27,10 @@ class LoginPage extends StatelessWidget {
                       },
                       child: const Padding(
                         padding: EdgeInsets.all(8.0),
-                        child:
-                            Text('Zaloguj się', style: TextStyle(fontSize: 20)),
+                        child: Text(
+                          'Zaloguj się',
+                          style: TextStyle(fontSize: 20),
+                        ),
                       ),
                     ),
                   ),
@@ -43,8 +45,10 @@ class LoginPage extends StatelessWidget {
                       },
                       child: const Padding(
                         padding: EdgeInsets.all(8.0),
-                        child: Text('Zarejestruj się',
-                            style: TextStyle(fontSize: 20)),
+                        child: Text(
+                          'Zarejestruj się',
+                          style: TextStyle(fontSize: 20),
+                        ),
                       ),
                     ),
                   ),
@@ -98,7 +102,9 @@ class _LogInWindowState extends State<LogInWindow> {
                   controller: emailController,
                   obscureText: false,
                   decoration: const InputDecoration(
-                      border: OutlineInputBorder(), labelText: 'Adres email'),
+                    border: OutlineInputBorder(),
+                    labelText: 'Adres email',
+                  ),
                 ),
               ),
               Padding(
@@ -107,7 +113,9 @@ class _LogInWindowState extends State<LogInWindow> {
                   controller: passwordController,
                   obscureText: true,
                   decoration: const InputDecoration(
-                      border: OutlineInputBorder(), labelText: 'Hasło'),
+                    border: OutlineInputBorder(),
+                    labelText: 'Hasło',
+                  ),
                 ),
               ),
               MaterialButton(
@@ -116,7 +124,10 @@ class _LogInWindowState extends State<LogInWindow> {
                         email: emailController.text,
                         password: passwordController.text);
                   },
-                  child: const Text('OK', style: TextStyle(fontSize: 18))),
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(fontSize: 18),
+                  )),
               const SizedBox(height: 16),
               Text(widget.state.error ?? ''),
             ],
@@ -167,7 +178,9 @@ class _RegisterWindowState extends State<RegisterWindow> {
                   controller: emailController,
                   obscureText: false,
                   decoration: const InputDecoration(
-                      border: OutlineInputBorder(), labelText: 'Adres email'),
+                    border: OutlineInputBorder(),
+                    labelText: 'Adres email',
+                  ),
                 ),
               ),
               Padding(
@@ -176,7 +189,9 @@ class _RegisterWindowState extends State<RegisterWindow> {
                   controller: loginController,
                   obscureText: false,
                   decoration: const InputDecoration(
-                      border: OutlineInputBorder(), labelText: 'Login'),
+                    border: OutlineInputBorder(),
+                    labelText: 'Login',
+                  ),
                 ),
               ),
               Padding(
@@ -185,7 +200,9 @@ class _RegisterWindowState extends State<RegisterWindow> {
                   controller: passwordController,
                   obscureText: true,
                   decoration: const InputDecoration(
-                      border: OutlineInputBorder(), labelText: 'Hasło'),
+                    border: OutlineInputBorder(),
+                    labelText: 'Hasło',
+                  ),
                 ),
               ),
               MaterialButton(
