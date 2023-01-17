@@ -9,7 +9,7 @@ class Storage {
     Uint8List imageData = await file.readAsBytes();
 
     try {
-      storage.ref().child(fileName).putData(
+      await storage.ref().child(fileName).putData(
             imageData,
             SettableMetadata(contentType: 'image/png'),
           );

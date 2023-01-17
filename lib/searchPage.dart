@@ -41,6 +41,7 @@ class SearchPage extends StatelessWidget {
     return CustomScrollView(
       slivers: [
         SliverAppBar(
+          backgroundColor: Colors.brown,
           floating: true,
           snap: true,
           title: const Text("Wyszukaj użytkownika"),

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,8 @@ import 'package:kitticure/search_cubit.dart';
 import 'package:kitticure/storage_service.dart';
 import 'package:kitticure/listOfPictures.dart';
 import 'package:provider/provider.dart';
+
+import 'auth_cubit.dart';
 
 class Profile extends StatelessWidget {
   Profile({super.key, required this.login, required this.isFromSearch});
@@ -49,7 +52,8 @@ class Profile extends StatelessWidget {
 }
 
 class GridWidget extends StatefulWidget {
-  const GridWidget({super.key, required this.login, required this.isFromSearch});
+  const GridWidget(
+      {super.key, required this.login, required this.isFromSearch});
 
   final String login;
   final bool isFromSearch;
@@ -95,7 +99,11 @@ class _GridWidgetState extends State<GridWidget>
                   },
                   icon: const Icon(Icons.arrow_back),
                 )
-              : null,
+              : IconButton(
+                  onPressed: () {
+                    context.read<AuthCubit>().signOut();
+                  },
+                  icon: const Icon(Icons.logout)),
         ),
         body: Column(
           children: [
@@ -112,7 +120,11 @@ class _GridWidgetState extends State<GridWidget>
                         if (snapshot.hasData) {
                           return PicturesGrid(posts: snapshot.data?.docs);
                         } else {
-                          return Container();
+                          return const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.brown,
+                            ),
+                          );
                         }
                       })),
                   StreamBuilder(
@@ -121,7 +133,11 @@ class _GridWidgetState extends State<GridWidget>
                         if (snapshot.hasData) {
                           return PicturesGrid(posts: snapshot.data?.docs);
                         } else {
-                          return Container();
+                          return const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.brown,
+                            ),
+                          );
                         }
                       })),
                 ],
@@ -205,23 +221,16 @@ class PicturesGrid extends StatelessWidget {
         crossAxisCount: 3,
         childAspectRatio: 1,
       ),
-      itemBuilder: ((context, index) => FutureBuilder(
-          future: storage.downloadUrl((posts?[index].data() as Post).postId),
-          builder: ((context, snapshot2) {
-            if (snapshot2.connectionState == ConnectionState.done &&
-                snapshot2.hasData) {
-              return InkWell(
-                onTap: () {
-                  context
-                      .read<ProfileCubit>()
-                      .showPicture(posts?[index].data() as Post);
-                },
-                child: Image.network(snapshot2.data!),
-              );
-            } else {
-              return Container();
-            }
-          }))),
+      itemBuilder: ((context, index) => InkWell(
+            onTap: () {
+              context
+                  .read<ProfileCubit>()
+                  .showPicture(posts?[index].data() as Post);
+            },
+            child: Image(
+                image: CachedNetworkImageProvider(
+                    (posts?[index].data() as Post).photoURL)),
+          )),
     );
   }
 }
@@ -234,29 +243,38 @@ class PictureItem extends StatelessWidget {
   final PictureState? state;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Posty'),
-        leading: IconButton(
-          onPressed: () {
-            context.read<ProfileCubit>().goBack();
-          },
-          icon: const Icon(Icons.arrow_back),
-        ),
+    return MaterialApp(
+      theme: ThemeData(
+        primarySwatch: Colors.brown,
       ),
-      body: FutureBuilder(
-        future: firestore.getCurrentUserLogin(user?.email),
-        builder: ((context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done &&
-              snapshot.hasData) {
-            return ListItem(
-              post: state?.selectedPost as Post,
-              currentUserLogin: snapshot.data!,
-            );
-          } else {
-            return Container();
-          }
-        }),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Posty'),
+          leading: IconButton(
+            onPressed: () {
+              context.read<ProfileCubit>().goBack();
+            },
+            icon: const Icon(Icons.arrow_back),
+          ),
+        ),
+        body: FutureBuilder(
+          future: firestore.getCurrentUserLogin(user?.email),
+          builder: ((context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done &&
+                snapshot.hasData) {
+              return ListItem(
+                post: state?.selectedPost as Post,
+                currentUserLogin: snapshot.data!,
+              );
+            } else {
+              return const Center(
+                child: CircularProgressIndicator(
+                  color: Colors.brown,
+                ),
+              );
+            }
+          }),
+        ),
       ),
     );
   }

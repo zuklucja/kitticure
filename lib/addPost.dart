@@ -22,39 +22,52 @@ class _AddPostState extends State<AddPost> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Wstaw nowy post"),
+    return MaterialApp(
+      theme: ThemeData(
+        primarySwatch: Colors.brown,
       ),
-      body: Container(
-          child: image != null
-              ? Center(
-                  child: Column(children: [
-                    const Text("Załadowano zdjęcie:"),
-                    Container(child: image),
-                  ]),
-                )
-              : Container(
-                  alignment: Alignment.center,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      ElevatedButton(
-                        onPressed: () {
-                          _getFromGallery(user);
-                        },
-                        child: const Text("ZAŁADUJ ZDJĘCIE"),
-                      ),
-                      if (!kIsWeb)
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text("Wstaw nowy post"),
+        ),
+        body: Container(
+            child: image != null
+                ? Center(
+                    child: Column(children: [
+                      const Text("Załadowano zdjęcie:"),
+                      Container(child: image),
+                    ]),
+                  )
+                : Container(
+                    alignment: Alignment.center,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
                         ElevatedButton(
                           onPressed: () {
-                            _getFromCamera(user);
+                            _getFromGallery(user);
                           },
-                          child: const Text("ZRÓB ZDJĘCIE APARATEM"),
-                        )
-                    ],
-                  ),
-                )),
+                          child: const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Text("ZAŁADUJ ZDJĘCIE",
+                                style: TextStyle(fontSize: 18)),
+                          ),
+                        ),
+                        if (!kIsWeb)
+                          ElevatedButton(
+                            onPressed: () {
+                              _getFromCamera(user);
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text("ZRÓB ZDJĘCIE APARATEM",
+                                  style: TextStyle(fontSize: 18)),
+                            ),
+                          )
+                      ],
+                    ),
+                  )),
+      ),
     );
   }
 
@@ -96,6 +109,11 @@ class _AddPostState extends State<AddPost> {
         });
 
         await storage.uploadFile(pickedFile, resultFF.id);
+        final String URL = await storage.downloadUrl(resultFF.id);
+
+        var document =
+            FirebaseFirestore.instance.collection('posts').doc(resultFF.id);
+        document.update({'photoURL': URL});
 
         setState(() {
           image = Image.file(File(pickedFile.path));

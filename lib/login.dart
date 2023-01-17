@@ -18,17 +18,37 @@ class LoginPage extends StatelessWidget {
         body: Center(
           child: Column(
             children: [
-              MaterialButton(
-                onPressed: () {
-                  context.read<AuthCubit>().tryToSignIn();
-                },
-                child: const Text('Zaloguj się'),
+              Row(
+                children: [
+                  Expanded(
+                    child: MaterialButton(
+                      onPressed: () {
+                        context.read<AuthCubit>().tryToSignIn();
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child:
+                            Text('Zaloguj się', style: TextStyle(fontSize: 20)),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              MaterialButton(
-                onPressed: () {
-                  context.read<AuthCubit>().tryToSignUp();
-                },
-                child: const Text('Zarejestruj się'),
+              Row(
+                children: [
+                  Expanded(
+                    child: MaterialButton(
+                      onPressed: () {
+                        context.read<AuthCubit>().tryToSignUp();
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text('Zarejestruj się',
+                            style: TextStyle(fontSize: 20)),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -52,42 +72,55 @@ class _LogInWindowState extends State<LogInWindow> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Zaloguj się"),
-        leading: IconButton(
-          onPressed: () {
-            context.read<AuthCubit>().goBack();
-          },
-          icon: const Icon(Icons.arrow_back),
-        ),
+    return MaterialApp(
+      theme: ThemeData(
+        primarySwatch: Colors.brown,
       ),
-      body: Center(
-        child: Column(
-          children: [
-            TextField(
-              autofocus: true,
-              controller: emailController,
-              obscureText: false,
-              decoration: const InputDecoration(
-                  border: OutlineInputBorder(), labelText: 'Adres email'),
-            ),
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                  border: OutlineInputBorder(), labelText: 'Hasło'),
-            ),
-            MaterialButton(
-                onPressed: () async {
-                  context.read<AuthCubit>().signIn(
-                      email: emailController.text,
-                      password: passwordController.text);
-                },
-                child: const Text('OK')),
-            const SizedBox(height: 16),
-            Text(widget.state.error ?? ''),
-          ],
+      home: Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+          backgroundColor: Colors.brown,
+          title: const Text("Zaloguj się"),
+          leading: IconButton(
+            onPressed: () {
+              context.read<AuthCubit>().goBack();
+            },
+            icon: const Icon(Icons.arrow_back),
+          ),
+        ),
+        body: Center(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                child: TextField(
+                  autofocus: true,
+                  controller: emailController,
+                  obscureText: false,
+                  decoration: const InputDecoration(
+                      border: OutlineInputBorder(), labelText: 'Adres email'),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                child: TextField(
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                      border: OutlineInputBorder(), labelText: 'Hasło'),
+                ),
+              ),
+              MaterialButton(
+                  onPressed: () async {
+                    context.read<AuthCubit>().signIn(
+                        email: emailController.text,
+                        password: passwordController.text);
+                  },
+                  child: const Text('OK', style: TextStyle(fontSize: 18))),
+              const SizedBox(height: 16),
+              Text(widget.state.error ?? ''),
+            ],
+          ),
         ),
       ),
     );
@@ -109,52 +142,68 @@ class _RegisterWindowState extends State<RegisterWindow> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Zarejestruj się"),
-        leading: IconButton(
-          onPressed: () {
-            context.read<AuthCubit>().goBack();
-          },
-          icon: const Icon(Icons.arrow_back),
-        ),
+    return MaterialApp(
+      theme: ThemeData(
+        primarySwatch: Colors.brown,
       ),
-      body: Center(
-        child: Column(
-          children: [
-            TextField(
-              autofocus: true,
-              controller: emailController,
-              obscureText: false,
-              decoration: const InputDecoration(
-                  border: OutlineInputBorder(), labelText: 'Adres email'),
-            ),
-            TextField(
-              controller: loginController,
-              obscureText: false,
-              decoration: const InputDecoration(
-                  border: OutlineInputBorder(), labelText: 'Login'),
-            ),
-            TextField(
-              controller: passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                  border: OutlineInputBorder(), labelText: 'Hasło'),
-            ),
-            MaterialButton(
-              onPressed: () async {
-                context.read<AuthCubit>().signUp(
-                    email: emailController.text,
-                    login: loginController.text,
-                    password: passwordController.text);
-
-                // Provider.of<Admin>(context, listen: false).setCurrentUser(user);
-              },
-              child: const Text('OK'),
-            ),
-            const SizedBox(height: 16),
-            Text(widget.state.error ?? ''),
-          ],
+      home: Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+          title: const Text("Zarejestruj się"),
+          leading: IconButton(
+            onPressed: () {
+              context.read<AuthCubit>().goBack();
+            },
+            icon: const Icon(Icons.arrow_back),
+          ),
+        ),
+        body: Center(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                child: TextField(
+                  autofocus: true,
+                  controller: emailController,
+                  obscureText: false,
+                  decoration: const InputDecoration(
+                      border: OutlineInputBorder(), labelText: 'Adres email'),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                child: TextField(
+                  controller: loginController,
+                  obscureText: false,
+                  decoration: const InputDecoration(
+                      border: OutlineInputBorder(), labelText: 'Login'),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                child: TextField(
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                      border: OutlineInputBorder(), labelText: 'Hasło'),
+                ),
+              ),
+              MaterialButton(
+                onPressed: () async {
+                  context.read<AuthCubit>().signUp(
+                      email: emailController.text,
+                      login: loginController.text,
+                      password: passwordController.text);
+                },
+                child: const Text(
+                  'OK',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(widget.state.error ?? ''),
+            ],
+          ),
         ),
       ),
     );

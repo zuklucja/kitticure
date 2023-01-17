@@ -21,7 +21,10 @@ class _MainPageState extends State<MainPage> {
     ListOfPictures(),
     const SearchGate(),
     const AddPost(),
-    Profile(login: "", isFromSearch: false,),
+    Profile(
+      login: "",
+      isFromSearch: false,
+    ),
   ];
 
   Firestore firestore = Firestore();
@@ -36,6 +39,7 @@ class _MainPageState extends State<MainPage> {
               bottomNavigationBar: BottomNavigationBar(
                 showSelectedLabels: false,
                 showUnselectedLabels: false,
+                selectedItemColor: Colors.brown,
                 type: BottomNavigationBarType.fixed,
                 iconSize: 40,
                 items: const <BottomNavigationBarItem>[
@@ -63,7 +67,10 @@ class _MainPageState extends State<MainPage> {
                 child: snapshot.connectionState == ConnectionState.done &&
                         snapshot.hasData
                     ? _selectedIndex == 3
-                        ? Profile(login: snapshot.data!, isFromSearch: false,)
+                        ? Profile(
+                            login: snapshot.data!,
+                            isFromSearch: false,
+                          )
                         : _pages.elementAt(_selectedIndex)
                     : _pages.elementAt(_selectedIndex),
               ));

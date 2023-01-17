@@ -19,6 +19,10 @@ class AuthCubit extends Cubit<AuthState> {
   }) async {
     emit(const SigningInState());
     try {
+      if (email == "" || password == "") {
+        emit(const TryingToSignInState(error: 'Wypełnij wszystkie pola!'));
+        return;
+      }
       final result = await authService.signInWithEmail(email, password);
 
       switch (result) {
