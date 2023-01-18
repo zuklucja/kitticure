@@ -175,10 +175,15 @@ class PicturesGrid extends StatelessWidget {
                   .read<ProfileCubit>()
                   .showPicture(posts?[index].data() as Post);
             },
-            child: Image(
-                image: CachedNetworkImageProvider(
-              (posts?[index].data() as Post).photoURL,
-            )),
+            child: (posts?[index].data() as Post).photoURL != null
+                ? Image(
+                    image: CachedNetworkImageProvider(
+                    (posts?[index].data() as Post).photoURL!,
+                  ))
+                : const Center(
+                    child: CircularProgressIndicator(
+                    color: Colors.brown,
+                  )),
           )),
     );
   }

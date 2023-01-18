@@ -16,43 +16,49 @@ class ListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    CachedNetworkImage image = CachedNetworkImage(
-      cacheManager: CustomCacheManager(),
-      imageUrl: post.photoURL,
-    );
-
-    return Center(
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width < 450
-            ? MediaQuery.of(context).size.width
-            : 450,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0),
-          child: Container(
-            padding: const EdgeInsets.all(8.0),
-            width: image.width,
-            height: image.height,
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: const Color.fromARGB(60, 83, 83, 83),
-              ),
-              borderRadius: const BorderRadius.all(Radius.circular(10)),
+    Widget image = post.photoURL != null
+        ? CachedNetworkImage(
+            cacheManager: CustomCacheManager(),
+            imageUrl: post.photoURL!,
+          )
+        : const Center(
+            child: CircularProgressIndicator(
+              color: Colors.brown,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                LoginBar(
-                  currentUserLogin: currentUserLogin,
-                  post: post,
+          );
+
+    return SingleChildScrollView(
+      child: Center(
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width < 500
+              ? MediaQuery.of(context).size.width
+              : 500,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0),
+            child: Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: const Color.fromARGB(60, 83, 83, 83),
                 ),
-                const SizedBox(width: 5),
-                image,
-                const SizedBox(width: 5),
-                FavoriteButtonBar(
-                  post: post,
-                  currentUserLogin: currentUserLogin,
-                ),
-              ],
+                borderRadius: const BorderRadius.all(Radius.circular(10)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  LoginBar(
+                    currentUserLogin: currentUserLogin,
+                    post: post,
+                  ),
+                  const SizedBox(width: 5),
+                  image,
+                  const SizedBox(width: 5),
+                  FavoriteButtonBar(
+                    post: post,
+                    currentUserLogin: currentUserLogin,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

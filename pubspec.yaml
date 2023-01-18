@@ -49,6 +49,7 @@ dependencies:
   flutter_cache_manager: ^3.3.0
   file: ^6.1.4
   path: ^1.8.2
+  internet_connection_checker: ^1.0.0+1
 
 dev_dependencies:
   flutter_test:

@@ -4,8 +4,14 @@ import 'package:kitticure/list_item.dart';
 import 'package:kitticure/posts.dart';
 import 'services/firestore_service.dart';
 
-class ListOfPictures extends StatelessWidget {
-  ListOfPictures({super.key});
+class ListOfPictures extends StatefulWidget {
+  const ListOfPictures({super.key});
+
+  @override
+  State<ListOfPictures> createState() => _ListOfPicturesState();
+}
+
+class _ListOfPicturesState extends State<ListOfPictures> {
   final User? user = FirebaseAuth.instance.currentUser;
   final Firestore firestore = Firestore();
 
@@ -30,12 +36,15 @@ class ListOfPictures extends StatelessWidget {
                     ),
                   );
                 } else {
-                  return ListView.builder(
-                    itemCount: snapshot.data?.docs.length,
-                    itemBuilder: ((context, index) => ListItem(
-                          post: snapshot.data?.docs[index].data() as Post,
-                          currentUserLogin: snapshotFB.data as String,
-                        )),
+                  return RefreshIndicator(
+                    onRefresh: refresh,
+                    child: ListView.builder(
+                      itemCount: snapshot.data?.docs.length,
+                      itemBuilder: ((context, index) => ListItem(
+                            post: snapshot.data?.docs[index].data() as Post,
+                            currentUserLogin: snapshotFB.data as String,
+                          )),
+                    ),
                   );
                 }
               });
@@ -48,5 +57,9 @@ class ListOfPictures extends StatelessWidget {
         }
       }),
     );
+  }
+
+  Future<void> refresh() async {
+    setState(() {});
   }
 }

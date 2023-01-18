@@ -4,7 +4,7 @@ class Post {
   final String ownerLogin;
   final Timestamp date;
   final String postId;
-  final String photoURL;
+  final String? photoURL;
 
   Post(
       {required this.ownerLogin,
@@ -17,7 +17,7 @@ class Post {
             ownerLogin: json['ownerLogin'] as String,
             date: json['date'] as Timestamp,
             postId: postId,
-            photoURL: json['photoURL'] as String);
+            photoURL: json['photoURL'] as String?);
 
   Map<String, Object?> toJson() {
     return {'ownerLogin': ownerLogin, 'date': date, 'photoURL': photoURL};
