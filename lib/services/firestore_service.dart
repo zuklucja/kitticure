@@ -138,4 +138,15 @@ class Firestore {
     var document = firestore.collection('posts').doc(id);
     await document.update({'photoURL': url});
   }
+
+    Future<bool> doesLoginAlreadyExists(String login) async {
+    return firestore
+        .collection('users')
+        .where('login', isEqualTo: login)
+        .limit(1)
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      return querySnapshot.docs.length == 1;
+    });
+  }
 }

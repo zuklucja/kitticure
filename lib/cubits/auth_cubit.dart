@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kitticure/services/firestore_service.dart';
 
 import '../services/auth_service.dart';
 
@@ -47,8 +48,8 @@ class AuthCubit extends Cubit<AuthState> {
           break;
       }
     } catch (e) {
-      emit(
-          const SignedOutState(error: 'Coś poszło nie tak, spróbuj ponownie.'));
+      emit(const TryingToSignInState(
+          error: 'Coś poszło nie tak, spróbuj ponownie.'));
     }
   }
 
@@ -57,13 +58,14 @@ class AuthCubit extends Cubit<AuthState> {
     required String login,
     required String password,
   }) async {
+    var firestore = Firestore();
     emit(const SigningInState());
     try {
       if (email == "" || login == "" || password == "") {
         emit(const TryingToSignUpState(error: 'Wypełnij wszystkie pola!'));
         return;
       }
-      if (await doesLoginAlreadyExists(login)) {
+      if (await firestore.doesLoginAlreadyExists(login)) {
         emit(const TryingToSignUpState(error: 'Wybrany login jest już zajęty'));
         return;
       }
@@ -84,18 +86,6 @@ class AuthCubit extends Cubit<AuthState> {
       emit(const TryingToSignUpState(
           error: 'Coś poszło nie tak, spróbuj ponownie.'));
     }
-  }
-
-  Future<bool> doesLoginAlreadyExists(String login) async {
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    return firestore
-        .collection('users')
-        .where('login', isEqualTo: login)
-        .limit(1)
-        .get()
-        .then((QuerySnapshot querySnapshot) {
-      return querySnapshot.docs.length == 1;
-    });
   }
 
   Future<void> signOut() async {
